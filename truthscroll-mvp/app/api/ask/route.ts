@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { openai } from '@/lib/openai';
+import { getOpenAI } from '@/lib/openai';
 import { bibleScholarSystemPrompt, verseStudyPrompt } from '@/lib/prompts';
 
 function hasOpenAIKey() {
@@ -102,6 +102,11 @@ export async function POST(req: Request) {
 
     // Dev mock: if no OpenAI key is configured, return a question-specific mock response
     if (!hasOpenAIKey()) {
+      return NextResponse.json({ answer: buildMockAnswer(question) });
+    }
+
+    const openai = getOpenAI();
+    if (!openai) {
       return NextResponse.json({ answer: buildMockAnswer(question) });
     }
 
