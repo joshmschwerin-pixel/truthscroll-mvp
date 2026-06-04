@@ -8,7 +8,7 @@ async function fetchVerseTextOnline(reference: string) { try { const res
     (!res.ok) return null; const data = await res.json(); return 
     (data.text || '').trim() || null;
   } catch (e) {
-    return null; Git Bash }
+    return null;
 }
 
 function pickPassageForTopic(topic: string) {
