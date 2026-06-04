@@ -86,7 +86,6 @@ export async function POST(req: Request) {
     } catch (err) {
       // If model didn't return JSON, fall back to a server-generated lesson
       const lesson = await generateLessonMock(topic, age);
-      lesson.aiRaw = text;
       return NextResponse.json({ lesson });
     }
   } catch (error: any) {
