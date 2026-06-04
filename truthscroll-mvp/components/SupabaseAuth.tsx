@@ -11,7 +11,9 @@ export default function SupabaseAuth() {
   useEffect(() => {
     const supabase = getSupabaseClient();
     if (!supabase) {
-      setClientError('Supabase auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+      Promise.resolve().then(() => {
+        setClientError('Supabase auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+      });
       return;
     }
 

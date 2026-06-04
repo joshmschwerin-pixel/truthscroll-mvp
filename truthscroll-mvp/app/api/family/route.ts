@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { openai } from '@/lib/openai';
 import { bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
 
-import kjv from '@/data/kjv.json';
-
 async function fetchVerseTextOnline(reference: string) {
   try {
     const res = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}`);

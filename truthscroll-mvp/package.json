@@ -7,7 +7,7 @@
     "build": "next build",
     "install-lemmatizer": "npm install greek-lemmatizer --no-audit --no-fund",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.15.0",

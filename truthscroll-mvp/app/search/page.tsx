@@ -80,7 +80,7 @@ export default function SearchPage() {
 
       {status === 'done' && (
         <section>
-          <h2>Search term: "{query}"</h2>
+          <h2>Search term: &quot;{query}&quot;</h2>
 
           <h3>A. Direct English Matches</h3>
           <section className="grid">

@@ -96,7 +96,23 @@ export default function ExplorePage() {
   }, [verses, selectedVerseNumber]);
 
   const currentKey = selectedVerse ? `${selectedVerse.book} ${selectedVerse.chapter}:${selectedVerse.verse}` : '';
-  const [connections, setConnections] = useState<{ ref: string; text: string | null }[]>([]);
+  const [hydratedTexts, setHydratedTexts] = useState<Record<string, string | null>>({});
+
+  const refs = useMemo(() => {
+    if (!currentKey) return [];
+    return (otConnections[currentKey] || getFallbackOldTestamentConnections(currentKey)).map((ref) => ({
+      ref,
+      text: getVerseText(ref)
+    }));
+  }, [currentKey]);
+
+  const connections = useMemo(
+    () => refs.map((connection) => ({
+      ...connection,
+      text: connection.text ?? hydratedTexts[connection.ref] ?? null
+    })),
+    [refs, hydratedTexts]
+  );
 
   async function fetchVerseTextOnline(reference: string) {
     try {
@@ -111,16 +127,6 @@ export default function ExplorePage() {
 
   useEffect(() => {
     let active = true;
-    if (!currentKey) {
-      setConnections([]);
-      return;
-    }
-
-    const refs = (otConnections[currentKey] || getFallbackOldTestamentConnections(currentKey)).map((ref) => ({
-      ref,
-      text: getVerseText(ref)
-    }));
-    setConnections(refs);
 
     async function hydrateTexts() {
       const updated = await Promise.all(
@@ -130,16 +136,19 @@ export default function ExplorePage() {
           return { ...connection, text };
         })
       );
-      if (active) {
-        setConnections(updated);
-      }
+
+      if (!active) return;
+      setHydratedTexts((prev) => ({
+        ...prev,
+        ...Object.fromEntries(updated.map((connection) => [connection.ref, connection.text]))
+      }));
     }
 
     hydrateTexts();
     return () => {
       active = false;
     };
-  }, [currentKey]);
+  }, [refs]);
 
   return (
     <main className="page">

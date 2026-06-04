@@ -225,7 +225,9 @@ export default function StudyPage() {
 
   useEffect(() => {
     if (chapters.length > 0 && !chapters.includes(selectedChapter)) {
-      setSelectedChapter(chapters[0]);
+      Promise.resolve().then(() => {
+        setSelectedChapter(chapters[0]);
+      });
     }
   }, [chapters, selectedChapter]);
 

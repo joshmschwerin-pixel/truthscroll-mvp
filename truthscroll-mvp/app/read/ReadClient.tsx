@@ -58,8 +58,10 @@ export default function ReadClient() {
         const qb = params.get('book');
         const qc = Number(params.get('chapter') || '0') || undefined;
         if (qb && books.includes(qb)) {
-          setSelectedBook(qb);
-          setSelectedChapter(qc || bookChapterMap[qb]?.[0] || 1);
+          Promise.resolve().then(() => {
+            setSelectedBook(qb);
+            setSelectedChapter(qc || bookChapterMap[qb]?.[0] || 1);
+          });
         }
       } catch (e) {
         // ignore
@@ -92,8 +94,10 @@ export default function ReadClient() {
     if (typeof window === 'undefined') return;
     const savedNotes = window.localStorage.getItem('truthscroll-notes');
     const savedHighlights = window.localStorage.getItem('truthscroll-highlights');
-    if (savedNotes) setNotes(JSON.parse(savedNotes));
-    if (savedHighlights) setHighlighted(JSON.parse(savedHighlights));
+    Promise.resolve().then(() => {
+      if (savedNotes) setNotes(JSON.parse(savedNotes));
+      if (savedHighlights) setHighlighted(JSON.parse(savedHighlights));
+    });
   }, []);
 
   useEffect(() => {
