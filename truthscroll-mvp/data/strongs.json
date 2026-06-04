@@ -1,0 +1,14 @@
+{
+  "ἀγάπη": {"strong":"G26","translit":"agapē","gloss":"love (noun, covenant love)"},
+  "ἠγάπησεν": {"strong":"G25","translit":"ēgapēsen","gloss":"to love (verb)"},
+  "ἠγαπημένος": {"strong":"G25","translit":"ēgapēmenos","gloss":"beloved (from agapaō)"},
+  "λόγος": {"strong":"G3056","translit":"logos","gloss":"word, reason, principle"},
+  "θεός": {"strong":"G2316","translit":"theos","gloss":"God"},
+  "κόσμον": {"strong":"G2889","translit":"kosmos","gloss":"world"},
+  "μακροθυμεῖ": {"strong":"G3115","translit":"makrothumei","gloss":"is patient"},
+  "ἀποστέλλω": {"strong":"G649","translit":"apostellō","gloss":"to send"},
+  "χάρις": {"strong":"G5485","translit":"charis","gloss":"grace, favor"},
+  "πνεῦμα": {"strong":"G4151","translit":"pneuma","gloss":"Spirit, breath"},
+  "χριστός": {"strong":"G5547","translit":"christos","gloss":"anointed, Christ"},
+  "σωτήρ": {"strong":"G4990","translit":"sōtēr","gloss":"savior, deliverer"}
+}

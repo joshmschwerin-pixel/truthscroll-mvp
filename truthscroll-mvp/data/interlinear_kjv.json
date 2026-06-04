@@ -1,0 +1,36 @@
+[
+  {
+    "book": "John",
+    "chapter": 3,
+    "verse": 16,
+    "tokens": [
+      { "eng": "For", "orig": "ὅτι", "translit": "hoti", "gloss": "for, because" },
+      { "eng": "God", "orig": "θεός", "translit": "theos", "strong": "G2316", "gloss": "God" },
+      { "eng": "so", "orig": "οὕτως", "translit": "houtōs", "gloss": "so, thus" },
+      { "eng": "loved", "orig": "ἠγάπησεν", "translit": "ēgapēsen", "strong": "G25", "gloss": "to love (verb)" },
+      { "eng": "the", "orig": "τὸν", "translit": "ton" },
+      { "eng": "world", "orig": "κόσμον", "translit": "kosmon", "strong": "G2889", "gloss": "world" }
+    ]
+  },
+  {
+    "book": "1 Corinthians",
+    "chapter": 13,
+    "verse": 4,
+    "tokens": [
+      { "eng": "Charity", "orig": "ἀγάπη", "translit": "agapē", "strong": "G26", "gloss": "love (noun, covenant love)" },
+      { "eng": "suffereth", "orig": "μακροθυμεῖ", "translit": "makrothumei", "strong": "G3115", "gloss": "is patient" },
+      { "eng": "long", "orig": "μακροθυμεῖ", "translit": "makrothumei" }
+    ]
+  },
+  {
+    "book": "John",
+    "chapter": 11,
+    "verse": 3,
+    "tokens": [
+      { "eng": "messengers", "orig": "ἀπεσταλμένοι", "translit": "apestalmenoi" },
+      { "eng": "to him", "orig": "πρὸς αὐτόν", "translit": "pros auton" },
+      { "eng": "which", "orig": "οἱ", "translit": "hoi" },
+      { "eng": "loved", "orig": "ἠγαπημένος", "translit": "ēgapēmenos", "strong": "G25", "gloss": "beloved (from agapaō)" }
+    ]
+  }
+]
