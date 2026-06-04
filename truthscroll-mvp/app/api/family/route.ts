@@ -1,6 +1,6 @@
-nano truthscroll-mvp/app/api/family/route.tsimport { NextResponse } from 
-'next/server'; import { openai } from '@/lib/openai'; import { 
-bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
+import { NextResponse } from 'next/server';
+import { openai } from '@/lib/openai';
+import { bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
 
 async function fetchVerseTextOnline(reference: string) { try { const res 
     = await 
