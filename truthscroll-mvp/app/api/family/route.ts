@@ -1,16 +1,14 @@
-import { NextResponse } from 'next/server';
-import { openai } from '@/lib/openai';
-import { bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
+nano truthscroll-mvp/app/api/family/route.tsimport { NextResponse } from 
+'next/server'; import { openai } from '@/lib/openai'; import { 
+bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
 
-async function fetchVerseTextOnline(reference: string) {
-  try {
-    const res = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return (data.text || '').trim() || null;
+async function fetchVerseTextOnline(reference: string) { try { const res 
+    = await 
+    fetch(`https://bible-api.com/${encodeURIComponent(reference)}`); if 
+    (!res.ok) return null; const data = await res.json(); return 
+    (data.text || '').trim() || null;
   } catch (e) {
-    return null;
-  }
+    return null; Git Bash }
 }
 
 function pickPassageForTopic(topic: string) {
@@ -90,3 +88,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message || 'Lesson generation failed.' }, { status: 500 });
   }
 }
+cd ~/Downloads/truthscroll-mvp
+
