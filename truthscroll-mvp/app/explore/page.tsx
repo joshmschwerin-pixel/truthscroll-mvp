@@ -204,20 +204,24 @@ export default function ExplorePage() {
         <section className="card" style={{ marginBottom: 16 }}>
           <h2>Selected passage</h2>
           <h3>{selectedVerse.book} {selectedVerse.chapter}:{selectedVerse.verse}</h3>
-          <div style={{ whiteSpace: 'pre-wrap', marginTop: 8, padding: 12, borderRadius: 6, border: '1px solid #ddd' }}>
+          <div style={{ marginTop: 8, padding: 12, borderRadius: 6, border: '1px solid #ddd', lineHeight: 1.6 }}>
             {selectedVerse.text}
           </div>
           {connections.length > 0 && (
             <>
-              <h4 style={{ marginTop: 16 }}>Old Testament connections</h4>
-              <ul>
+              <h4 style={{ marginTop: 16, marginBottom: 12 }}>Old Testament connections</h4>
+              <div style={{ display: 'grid', gap: 12 }}>
                 {connections.map((connection) => (
-                  <li key={connection.ref} style={{ marginBottom: 8 }}>
-                    <strong>{connection.ref}</strong>
-                    {connection.text ? ` — ${connection.text}` : ' — full text unavailable'}
-                  </li>
+                  <div key={connection.ref} style={{ padding: 12, borderRadius: 6, border: '1px solid #e0e0e0', backgroundColor: '#f9f9f9' }}>
+                    <strong style={{ fontSize: 16 }}>{connection.ref}</strong>
+                    {connection.text && (
+                      <div style={{ marginTop: 8, lineHeight: 1.6, fontSize: 15 }}>
+                        {connection.text}
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </>
           )}
         </section>
