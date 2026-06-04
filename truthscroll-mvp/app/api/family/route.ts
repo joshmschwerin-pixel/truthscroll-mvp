@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { openai } from '@/lib/openai';
+import { getOpenAI } from '@/lib/openai';
 import { bibleScholarSystemPrompt, familyLessonPrompt } from '@/lib/prompts';
 
 async function fetchVerseTextOnline(reference: string) {
@@ -61,6 +61,12 @@ export async function POST(req: Request) {
     }
 
     if (!hasOpenAIKey()) {
+      const lesson = await generateLessonMock(topic, age);
+      return NextResponse.json({ lesson });
+    }
+
+    const openai = getOpenAI();
+    if (!openai) {
       const lesson = await generateLessonMock(topic, age);
       return NextResponse.json({ lesson });
     }
