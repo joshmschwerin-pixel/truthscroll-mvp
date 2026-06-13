@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchVerses, getVerse } from '@/lib/bibleData';
+import { searchVerses, getVerse } from '@/lib/bibleData.server';
 import fs from 'fs';
 import path from 'path';
 

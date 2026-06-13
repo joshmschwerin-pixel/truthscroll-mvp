@@ -2,25 +2,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import getSupabaseClient from '@/lib/supabaseClient';
 import type { BibleVerse } from '@/lib/bibleData';
-import { getAvailableBooks, getAvailableChapters, getChapter } from '@/lib/bibleData';
 
 type ReadClientProps = {
   initialNotes?: Record<string, string>;
   initialHighlights?: Record<string, boolean>;
   initialBook?: string;
   initialChapter?: number;
+  availableBooks: string[];
+  availableChapters: number[];
+  initialVerses: BibleVerse[];
 };
 
 export default function ReadClient({
   initialNotes = {},
   initialHighlights = {},
   initialBook,
-  initialChapter
+  initialChapter,
+  availableBooks,
+  availableChapters,
+  initialVerses
 }: ReadClientProps) {
-  const availableBooks = getAvailableBooks();
   const defaultBook = initialBook && availableBooks.includes(initialBook) ? initialBook : availableBooks[0] || '';
-  const initialBookChapters = defaultBook ? getAvailableChapters(defaultBook) : [];
-  const defaultChapter = initialChapter && initialBookChapters.includes(initialChapter) ? initialChapter : initialBookChapters[0] || 1;
+  const defaultChapter = initialChapter && availableChapters.includes(initialChapter) ? initialChapter : availableChapters[0] || 1;
 
   const [selectedChapter, setSelectedChapter] = useState({ book: defaultBook, chapter: defaultChapter });
   const [notes, setNotes] = useState<Record<string, string>>(initialNotes || {});
@@ -30,14 +33,12 @@ export default function ReadClient({
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastError, setLastError] = useState<string>('');
 
-  const availableChapters = useMemo(
-    () => (selectedChapter.book ? getAvailableChapters(selectedChapter.book) : []),
-    [selectedChapter.book]
-  );
-
   const verses = useMemo<BibleVerse[]>(
-    () => (selectedChapter.book ? getChapter(selectedChapter.book, selectedChapter.chapter) : []),
-    [selectedChapter.book, selectedChapter.chapter]
+    () =>
+      selectedChapter.book === defaultBook && selectedChapter.chapter === defaultChapter
+        ? initialVerses
+        : [],
+    [defaultBook, defaultChapter, initialVerses, selectedChapter.book, selectedChapter.chapter]
   );
 
   useEffect(() => {
@@ -129,8 +130,7 @@ export default function ReadClient({
           value={selectedChapter.book}
           onChange={(event) => {
             const book = event.target.value;
-            const chapters = getAvailableChapters(book);
-            setSelectedChapter({ book, chapter: chapters[0] || 1 });
+            setSelectedChapter({ book, chapter: 1 });
           }}
         >
           {availableBooks.map((book) => (
