@@ -1,25 +1,43 @@
 "use client";
-import { bible } from "../../data/bible";
 import { useEffect, useMemo, useState } from 'react';
 import getSupabaseClient from '@/lib/supabaseClient';
+import type { BibleVerse } from '@/lib/bibleData';
+import { getAvailableBooks, getAvailableChapters, getChapter } from '@/lib/bibleData';
 
-const chapterOptions = [
-  { book: 'John', chapter: 1 },
-  { book: 'Matthew', chapter: 1 }
-];
+type ReadClientProps = {
+  initialNotes?: Record<string, string>;
+  initialHighlights?: Record<string, boolean>;
+  initialBook?: string;
+  initialChapter?: number;
+};
 
-export default function ReadClient({ initialNotes = {}, initialHighlights = {} }: { initialNotes?: Record<string,string>, initialHighlights?: Record<string,boolean> }) {
-  const [selectedChapter, setSelectedChapter] = useState(chapterOptions[0]);
+export default function ReadClient({
+  initialNotes = {},
+  initialHighlights = {},
+  initialBook,
+  initialChapter
+}: ReadClientProps) {
+  const availableBooks = getAvailableBooks();
+  const defaultBook = initialBook && availableBooks.includes(initialBook) ? initialBook : availableBooks[0] || '';
+  const initialBookChapters = defaultBook ? getAvailableChapters(defaultBook) : [];
+  const defaultChapter = initialChapter && initialBookChapters.includes(initialChapter) ? initialChapter : initialBookChapters[0] || 1;
+
+  const [selectedChapter, setSelectedChapter] = useState({ book: defaultBook, chapter: defaultChapter });
   const [notes, setNotes] = useState<Record<string, string>>(initialNotes || {});
   const [highlighted, setHighlighted] = useState<Record<string, boolean>>(initialHighlights || {});
   const [activeNoteVerse, setActiveNoteVerse] = useState('');
   const [noteText, setNoteText] = useState('');
-  const [syncStatus, setSyncStatus] = useState<'idle'|'syncing'|'synced'|'error'>('idle');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastError, setLastError] = useState<string>('');
 
-  const verses = useMemo(
-    () => bible.filter((v) => v.book === selectedChapter.book && v.chapter === selectedChapter.chapter),
-    [selectedChapter]
+  const availableChapters = useMemo(
+    () => (selectedChapter.book ? getAvailableChapters(selectedChapter.book) : []),
+    [selectedChapter.book]
+  );
+
+  const verses = useMemo<BibleVerse[]>(
+    () => (selectedChapter.book ? getChapter(selectedChapter.book, selectedChapter.chapter) : []),
+    [selectedChapter.book, selectedChapter.chapter]
   );
 
   useEffect(() => {
@@ -52,10 +70,12 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
   async function syncLocalToServer() {
     setSyncStatus('syncing');
     setLastError('');
+
     try {
       const supabase = getSupabaseClient();
       const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
       const token = sessionData?.session?.access_token;
+
       if (!token) {
         setSyncStatus('error');
         setLastError('No session token');
@@ -88,12 +108,14 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
 
   return (
     <main className="page">
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Read Scripture</h1>
-        <div style={{textAlign:'right'}}>
-          <div style={{fontSize:12, color:'#94a3b8'}}>Sync status: <strong>{syncStatus}</strong></div>
-          {lastError && <div style={{color:'#ffb4b4'}}>{lastError}</div>}
-          <div style={{marginTop:8}}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+            Sync status: <strong>{syncStatus}</strong>
+          </div>
+          {lastError && <div style={{ color: '#ffb4b4' }}>{lastError}</div>}
+          <div style={{ marginTop: 8 }}>
             <button onClick={syncLocalToServer}>Sync Now</button>
           </div>
         </div>
@@ -102,36 +124,58 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
       <p>Choose a public-domain passage, read the text, and see cross-reference highlights.</p>
 
       <div className="panel">
-        <label>Passage</label>
+        <label>Book</label>
         <select
-          value={`${selectedChapter.book}-${selectedChapter.chapter}`}
+          value={selectedChapter.book}
           onChange={(event) => {
-            const [book, chapter] = event.target.value.split('-');
-            setSelectedChapter({ book, chapter: Number(chapter) });
+            const book = event.target.value;
+            const chapters = getAvailableChapters(book);
+            setSelectedChapter({ book, chapter: chapters[0] || 1 });
           }}
         >
-          {chapterOptions.map((option) => (
-            <option key={`${option.book}-${option.chapter}`} value={`${option.book}-${option.chapter}`}>
-              {option.book} {option.chapter}
+          {availableBooks.map((book) => (
+            <option key={book} value={book}>
+              {book}
+            </option>
+          ))}
+        </select>
+
+        <label style={{ marginTop: 12, display: 'block' }}>Chapter</label>
+        <select
+          value={String(selectedChapter.chapter)}
+          onChange={(event) => {
+            setSelectedChapter((prev) => ({ ...prev, chapter: Number(event.target.value) }));
+          }}
+        >
+          {availableChapters.map((chapter) => (
+            <option key={chapter} value={chapter}>
+              {chapter}
             </option>
           ))}
         </select>
       </div>
 
       <section className="card">
-        <h2>{selectedChapter.book} {selectedChapter.chapter}</h2>
+        <h2>
+          {selectedChapter.book} {selectedChapter.chapter}
+        </h2>
+
         {verses.map((verse) => {
           const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;
-          const themesText = Array.isArray(verse.themes) ? verse.themes.join(' • ') : '';
-          const crossRefsText = Array.isArray(verse.crossRefs) ? verse.crossRefs.join(', ') : '';
 
           return (
-            <article key={verseKey} className={`verse-card ${highlighted[verseKey] ? 'highlighted' : ''}`}>
+            <article
+              key={verseKey}
+              id={`verse-${verse.verse}`}
+              className={`verse-card ${highlighted[verseKey] ? 'highlighted' : ''}`}
+            >
               <div className="verse-header">
                 <span className="verse-label">{verse.verse}</span>
-                <span className="verse-themes">{themesText}</span>
+                <span className="verse-themes"></span>
               </div>
+
               <p>{verse.text}</p>
+
               <div className="verse-actions">
                 <button
                   type="button"
@@ -143,6 +187,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                       const supabase = getSupabaseClient();
                       const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                       const token = sessionData?.session?.access_token;
+
                       if (token && newValue) {
                         const res = await fetch('/api/highlights', {
                           method: 'POST',
@@ -151,6 +196,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                         });
                         if (!res.ok) throw new Error('Highlight save failed');
                       }
+
                       if (token && !newValue) {
                         const res = await fetch('/api/highlights', {
                           method: 'DELETE',
@@ -159,6 +205,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                         });
                         if (!res.ok) throw new Error('Highlight delete failed');
                       }
+
                       setSyncStatus('synced');
                     } catch (err: any) {
                       console.error('Highlight save failed', err);
@@ -169,6 +216,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                 >
                   {highlighted[verseKey] ? 'Unhighlight' : 'Highlight'}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -178,9 +226,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   Note
                 </button>
               </div>
-              <div className="verse-meta">
-                <strong>Cross refs:</strong> {crossRefsText}
-              </div>
+
               {highlighted[verseKey] && <div className="highlight-pill">Highlighted</div>}
               {notes[verseKey] && <div className="note-pill">Note saved</div>}
             </article>
@@ -203,6 +249,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   const supabase = getSupabaseClient();
                   const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                   const token = sessionData?.session?.access_token;
+
                   if (token) {
                     const res = await fetch('/api/notes', {
                       method: 'POST',
@@ -211,6 +258,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                     });
                     if (!res.ok) throw new Error('Note save failed');
                   }
+
                   setSyncStatus('synced');
                 } catch (err: any) {
                   console.error('Note save failed', err);
@@ -221,13 +269,11 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
             >
               Save Note
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveNoteVerse('')}
-              className="secondary"
-            >
+
+            <button type="button" onClick={() => setActiveNoteVerse('')} className="secondary">
               Close
             </button>
+
             <button
               type="button"
               onClick={async () => {
@@ -235,6 +281,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   const supabase = getSupabaseClient();
                   const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                   const token = sessionData?.session?.access_token;
+
                   if (token) {
                     const res = await fetch('/api/notes', {
                       method: 'DELETE',
@@ -243,11 +290,13 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                     });
                     if (!res.ok) throw new Error('Note delete failed');
                   }
+
                   setNotes((prev) => {
                     const copy = { ...prev };
                     delete copy[activeNoteVerse];
                     return copy;
                   });
+
                   setActiveNoteVerse('');
                   setSyncStatus('synced');
                 } catch (err: any) {
