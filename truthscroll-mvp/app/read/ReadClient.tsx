@@ -1,5 +1,5 @@
 "use client";
-import bible from "../../data/kjv.json";
+import { bible } from "../../data/bible";
 import { useEffect, useMemo, useState } from 'react';
 import getSupabaseClient from '@/lib/supabaseClient';
 
@@ -56,14 +56,26 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
       const supabase = getSupabaseClient();
       const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
       const token = sessionData?.session?.access_token;
-      if (!token) { setSyncStatus('error'); setLastError('No session token'); return; }
+      if (!token) {
+        setSyncStatus('error');
+        setLastError('No session token');
+        return;
+      }
 
       for (const [verseId, note] of Object.entries(notes)) {
-        await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId, note }) });
+        await fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ verseId, note })
+        });
       }
 
       for (const verseId of Object.keys(highlighted).filter((key) => highlighted[key])) {
-        await fetch('/api/highlights', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId, color: 'yellow' }) });
+        await fetch('/api/highlights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ verseId, color: 'yellow' })
+        });
       }
 
       setSyncStatus('synced');
@@ -132,11 +144,19 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                       const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                       const token = sessionData?.session?.access_token;
                       if (token && newValue) {
-                        const res = await fetch('/api/highlights', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId: verseKey, color: 'yellow' }) });
+                        const res = await fetch('/api/highlights', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ verseId: verseKey, color: 'yellow' })
+                        });
                         if (!res.ok) throw new Error('Highlight save failed');
                       }
                       if (token && !newValue) {
-                        const res = await fetch('/api/highlights', { method: 'DELETE', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId: verseKey }) });
+                        const res = await fetch('/api/highlights', {
+                          method: 'DELETE',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ verseId: verseKey })
+                        });
                         if (!res.ok) throw new Error('Highlight delete failed');
                       }
                       setSyncStatus('synced');
@@ -184,7 +204,11 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                   const token = sessionData?.session?.access_token;
                   if (token) {
-                    const res = await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId: activeNoteVerse, note: noteText }) });
+                    const res = await fetch('/api/notes', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ verseId: activeNoteVerse, note: noteText })
+                    });
                     if (!res.ok) throw new Error('Note save failed');
                   }
                   setSyncStatus('synced');
@@ -212,7 +236,11 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
                   const token = sessionData?.session?.access_token;
                   if (token) {
-                    const res = await fetch('/api/notes', { method: 'DELETE', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId: activeNoteVerse }) });
+                    const res = await fetch('/api/notes', {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ verseId: activeNoteVerse })
+                    });
                     if (!res.ok) throw new Error('Note delete failed');
                   }
                   setNotes((prev) => {
