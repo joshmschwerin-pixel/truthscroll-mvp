@@ -38,7 +38,7 @@ export default function FamilyPage() {
           <h3>Explanation</h3>
           <p>{lesson.explanation}</p>
 
-          {lesson.discussionQuestions && lesson.discussionQuestions.length > 0 && (
+          {Array.isArray(lesson.discussionQuestions) && lesson.discussionQuestions.length > 0 && (
             <>
               <h3>Discussion questions</h3>
               <ul>
@@ -50,7 +50,7 @@ export default function FamilyPage() {
           )}
 
           <h3>Activity</h3>
-          <p>{typeof lesson.activity === 'string' ? lesson.activity : (lesson.activity || []).join(' ')}</p>
+          <p>{typeof lesson.activity === 'string' ? lesson.activity : Array.isArray(lesson.activity) ? lesson.activity.join(' ') : ''}</p>
 
           <h3>Memory verse</h3>
           <p><strong>{lesson.memoryVerse}</strong></p>
@@ -62,7 +62,7 @@ export default function FamilyPage() {
           <p>{lesson.parentNotes}</p>
 
           <h3>Materials needed</h3>
-          <p>{(lesson.materials || []).join(', ')}</p>
+          <p>{Array.isArray(lesson.materials) ? lesson.materials.join(', ') : ''}</p>
 
           <p style={{ marginTop: 16 }}>
             <strong>Duration:</strong> {lesson.durationMinutes} minutes

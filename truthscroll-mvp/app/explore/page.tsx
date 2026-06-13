@@ -2,12 +2,19 @@
 import { useMemo, useState } from 'react';
 import { bible } from '@/data/bible';
 
-const themes = Array.from(new Set(bible.flatMap((verse) => verse.themes)));
+const themes = Array.from(
+  new Set(
+    bible.flatMap((verse) => (Array.isArray(verse.themes) ? verse.themes : []))
+  )
+);
 
 export default function ExplorePage() {
-  const [selectedTheme, setSelectedTheme] = useState(themes[0]);
+  const [selectedTheme, setSelectedTheme] = useState(themes[0] || '');
   const related = useMemo(
-    () => bible.filter((verse) => verse.themes.includes(selectedTheme)),
+    () =>
+      bible.filter((verse) =>
+        Array.isArray(verse.themes) ? verse.themes.includes(selectedTheme) : false
+      ),
     [selectedTheme]
   );
 
@@ -31,7 +38,7 @@ export default function ExplorePage() {
             <h2>{verse.book} {verse.chapter}:{verse.verse}</h2>
             <p>{verse.text}</p>
             <p><strong>Greek:</strong> {verse.greek}</p>
-            <p><strong>Cross refs:</strong> {verse.crossRefs.join(', ')}</p>
+            <p><strong>Cross refs:</strong> {Array.isArray(verse.crossRefs) ? verse.crossRefs.join(', ') : ''}</p>
           </div>
         ))}
       </section>
