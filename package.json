@@ -1,10 +1,13 @@
 {
   "name": "truthscroll-mvp-root",
   "private": true,
+  "workspaces": [
+    "truthscroll-mvp"
+  ],
   "scripts": {
-    "dev": "cd truthscroll-mvp && npm run dev",
-    "build": "cd truthscroll-mvp && npm run build",
-    "start": "cd truthscroll-mvp && npm run start",
-    "lint": "cd truthscroll-mvp && npm run lint"
+    "dev": "npm run dev --workspace truthscroll-mvp",
+    "build": "npm run build --workspace truthscroll-mvp",
+    "start": "npm run start --workspace truthscroll-mvp",
+    "lint": "npm run lint --workspace truthscroll-mvp"
   }
 }
