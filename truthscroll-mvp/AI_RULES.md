@@ -1,38 +1,40 @@
-# AI Rules for TruthScroll MVP
+# TruthScroll MVP - AI Rules
 
-## App purpose
-TruthScroll MVP is a Bible study web app focused on transparent scripture reading, search, study tools, AI-assisted Q&A, visual exploration, notes, highlights, and family discipleship content.
+## App Purpose
+TruthScroll is a Bible study and original-language search app. The goal is to help users search Scripture, understand English translation choices, and see the Hebrew or Greek words behind Bible passages.
 
-## Tech stack
-- Next.js app using the App Router
-- React for UI
-- TypeScript for application code
-- CSS via `app/globals.css`
-- OpenAI for AI-powered Bible Q&A
-- Supabase for auth, notes, highlights, and future data features
-- Local JSON data files for Bible and study content
-- React Flow for visual exploration features
-- Node/Python scripts for DOCX conversion, OCR, and data normalization
+## Tech Stack
+- Use Next.js with the existing App Router structure.
+- Use React components for all UI.
+- Use TypeScript for safer code.
+- Use Tailwind CSS for styling if it already exists in the project.
+- Use local JSON or TypeScript data files for MVP Bible/search data before adding a database.
+- Use Supabase only when we are ready for saved users, notes, search history, or large structured Bible data.
+- Keep components small and readable.
+- Keep pages simple and working before adding advanced features.
+- Do not add unnecessary packages.
+- Do not change the framework or folder structure unless asked.
 
-## Coding rules
-- Keep changes small, clear, and easy to review.
-- Prefer server components by default; use `"use client"` only when needed.
-- Use TypeScript for all app code.
-- Reuse existing project patterns before introducing new ones.
-- Preserve the Bible-study focus and transparent, careful tone of the product.
-- Do not replace working data shapes or API response formats without a clear reason.
+## Coding Rules
+- Make one small change at a time.
+- Do not rebuild the entire app unless explicitly asked.
+- Do not remove existing pages, components, or data without explaining why.
+- Fix broken imports before adding new features.
+- Prefer simple working MVP code over complex architecture.
+- Use clear file names and clear component names.
+- Add comments only where they help explain important logic.
+- Keep the app beginner-friendly so the owner can understand and maintain it.
 
-## Libraries to use
-- Use `next` and `react` for app structure and UI.
-- Use `@supabase/supabase-js` for auth and database-related features.
-- Use `openai` for AI generation and question-answering features.
-- Use `react-flow-renderer` only for graph, map, or relationship visualizations.
-- Use local JSON files in `data/` for scripture, interlinear, lemma, and Strong’s-based content.
-- Use the existing scripts in `scripts/` for DOCX import, OCR, and normalization tasks.
+## Feature Rules
+- Search should eventually support English words, Bible references, Greek words, Hebrew words, literal meanings, and alternate translations.
+- Study results must avoid generic filler.
+- Explore should include relevant Old Testament and New Testament references where possible.
+- Family mode should change based on selected age and should not return the same generic answer for every age.
+- Original-language notes should clearly distinguish Greek, Hebrew, literal meaning, alternate translation, and interpretation.
 
-## What not to change without asking
-- Do not change the overall app purpose or core module structure.
-- Do not swap out Next.js, React, TypeScript, OpenAI, or Supabase.
-- Do not rename or restructure major routes in `app/` without asking.
-- Do not change core Bible data files or schema formats without asking.
-- Do not remove existing auth, notes, highlights, or AI endpoints without asking.
+## Safety Rules
+- Do not invent Bible data as final truth.
+- Placeholder data is allowed only if clearly labeled as placeholder.
+- Do not claim Greek or Hebrew accuracy unless the data is actually provided.
+- Do not connect Supabase or change environment variables unless asked.
+- Do not push to GitHub unless the user confirms the app still works.
