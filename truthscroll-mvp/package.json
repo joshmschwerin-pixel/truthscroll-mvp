@@ -16,8 +16,7 @@
     "openai": "^4.103.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-flow-renderer": "^10.3.17",
-    "tesseract.js": "^2.1.5"
+    "react-flow-renderer": "^10.3.17"
   },
   "devDependencies": {
     "@types/node": "^20.17.57",

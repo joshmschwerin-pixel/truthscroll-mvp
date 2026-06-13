@@ -336,6 +336,7 @@ allowBuilds:
   swagger-ui: true
   swiftlint: true
   taiko: true
+  tesseract.js: set this to true or false
   tldjs: true
   tree-sitter: true
   tree-sitter-cli: true
@@ -349,6 +350,7 @@ allowBuilds:
   ttf2woff2: true
   typemoq: true
   unix-dgram: true
+  unrs-resolver: set this to true or false
   ursa-optional: true
   usb: true
   utf-8-validate: true
