@@ -22,25 +22,51 @@ export default function FamilyPage() {
       {lesson && typeof lesson === 'object' && !lesson.error && (
         <section className="card" style={{ marginTop: 16 }}>
           <h2>{lesson.title}</h2>
-          <p><strong>Age:</strong> {lesson.ageRange}</p>
+          <p><strong>Age range:</strong> {lesson.ageRange}</p>
+
           <h3>Opening question</h3>
-          <p>{lesson.openingQuestion}</p>
-          <h3>Passage</h3>
+          <p><em>{lesson.openingQuestion}</em></p>
+
+          <h3>Scripture passage</h3>
           <p><strong>{lesson.passageRef}</strong></p>
-          {lesson.passageText && <div style={{ whiteSpace: 'pre-wrap', marginTop: 8, padding: 8, border: '1px solid #eee' }}>{lesson.passageText}</div>}
+          {lesson.passageText && (
+            <div style={{ marginTop: 8, padding: 12, borderRadius: 6, border: '1px solid #ddd', backgroundColor: '#f9f9f9', lineHeight: 1.7, fontSize: 14 }}>
+              {lesson.passageText}
+            </div>
+          )}
+
           <h3>Explanation</h3>
           <p>{lesson.explanation}</p>
-          <h3>Memory verse</h3>
-          <p>{lesson.memoryVerse}</p>
+
+          {lesson.discussionQuestions && lesson.discussionQuestions.length > 0 && (
+            <>
+              <h3>Discussion questions</h3>
+              <ul>
+                {lesson.discussionQuestions.map((q: string, i: number) => (
+                  <li key={i}>{q}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
           <h3>Activity</h3>
-          <ul>{(lesson.activity || []).map((a: string, i: number) => <li key={i}>{a}</li>)}</ul>
+          <p>{typeof lesson.activity === 'string' ? lesson.activity : (lesson.activity || []).join(' ')}</p>
+
+          <h3>Memory verse</h3>
+          <p><strong>{lesson.memoryVerse}</strong></p>
+
           <h3>Prayer</h3>
-          <p>{lesson.prayer}</p>
-          <h3>Parent notes</h3>
+          <p><em>{lesson.prayer}</em></p>
+
+          <h3>Parent teaching notes</h3>
           <p>{lesson.parentNotes}</p>
-          <h4>Materials</h4>
+
+          <h3>Materials needed</h3>
           <p>{(lesson.materials || []).join(', ')}</p>
-          <p><strong>Duration:</strong> {lesson.durationMinutes} minutes</p>
+
+          <p style={{ marginTop: 16 }}>
+            <strong>Duration:</strong> {lesson.durationMinutes} minutes
+          </p>
         </section>
       )}
     </main>

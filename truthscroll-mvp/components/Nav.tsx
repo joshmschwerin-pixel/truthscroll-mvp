@@ -4,7 +4,6 @@ import SupabaseAuth from './SupabaseAuth';
 
 const modules = [
   ['Read', '/read'],
-  ['Search', '/search'],
   ['Study', '/study'],
   ['Ask', '/ask'],
   ['Explore', '/explore'],

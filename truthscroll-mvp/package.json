@@ -5,13 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "install-lemmatizer": "npm install greek-lemmatizer --no-audit --no-fund",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/auth-helpers-nextjs": "^0.15.0",
-    "@supabase/auth-helpers-react": "^0.15.0",
     "@supabase/supabase-js": "latest",
     "adm-zip": "^0.5.17",
     "mammoth": "^1.4.19",
