@@ -1,13 +1,29 @@
 {
   "name": "truthscroll-mvp-root",
   "private": true,
-  "workspaces": [
-    "truthscroll-mvp"
-  ],
   "scripts": {
-    "dev": "npm run dev --workspace truthscroll-mvp",
-    "build": "npm run build --workspace truthscroll-mvp",
-    "start": "npm run start --workspace truthscroll-mvp",
-    "lint": "npm run lint --workspace truthscroll-mvp"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0",
+    "adm-zip": "^0.5.17",
+    "mammoth": "^1.4.19",
+    "next": "^14.2.30",
+    "openai": "^4.103.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-flow-renderer": "^10.3.17",
+    "tesseract.js": "^2.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.57",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.30",
+    "typescript": "^5.6.3"
   }
 }
