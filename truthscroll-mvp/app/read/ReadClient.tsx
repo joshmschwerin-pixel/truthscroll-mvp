@@ -28,7 +28,7 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
     const savedHighlights = window.localStorage.getItem('truthscroll-highlights');
     if (!Object.keys(initialNotes || {}).length && savedNotes) setNotes(JSON.parse(savedNotes));
     if (!Object.keys(initialHighlights || {}).length && savedHighlights) setHighlighted(JSON.parse(savedHighlights));
-  }, []);
+  }, [initialHighlights, initialNotes]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -40,7 +40,15 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
     window.localStorage.setItem('truthscroll-highlights', JSON.stringify(highlighted));
   }, [highlighted]);
 
-  // Sync function used by UI to upload local items to server
+  useEffect(() => {
+    if (!activeNoteVerse) {
+      setNoteText('');
+      return;
+    }
+
+    setNoteText(notes[activeNoteVerse] || '');
+  }, [activeNoteVerse, notes]);
+
   async function syncLocalToServer() {
     setSyncStatus('syncing');
     setLastError('');
@@ -50,12 +58,11 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
       const token = sessionData?.session?.access_token;
       if (!token) { setSyncStatus('error'); setLastError('No session token'); return; }
 
-      // Upload notes
       for (const [verseId, note] of Object.entries(notes)) {
         await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId, note }) });
       }
-      // Upload highlights
-      for (const verseId of Object.keys(highlighted).filter(k => highlighted[k])) {
+
+      for (const verseId of Object.keys(highlighted).filter((key) => highlighted[key])) {
         await fetch('/api/highlights', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId, color: 'yellow' }) });
       }
 
@@ -103,11 +110,14 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
         <h2>{selectedChapter.book} {selectedChapter.chapter}</h2>
         {verses.map((verse) => {
           const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;
+          const themesText = Array.isArray(verse.themes) ? verse.themes.join(' • ') : '';
+          const crossRefsText = Array.isArray(verse.crossRefs) ? verse.crossRefs.join(', ') : '';
+
           return (
             <article key={verseKey} className={`verse-card ${highlighted[verseKey] ? 'highlighted' : ''}`}>
               <div className="verse-header">
                 <span className="verse-label">{verse.verse}</span>
-                <span className="verse-themes">{verse.themes.join(' • ')}</span>
+                <span className="verse-themes">{themesText}</span>
               </div>
               <p>{verse.text}</p>
               <div className="verse-actions">
@@ -143,14 +153,13 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   type="button"
                   onClick={() => {
                     setActiveNoteVerse(verseKey);
-                    setNoteText(notes[verseKey] || '');
                   }}
                 >
                   Note
                 </button>
               </div>
               <div className="verse-meta">
-                <strong>Cross refs:</strong> {verse.crossRefs.join(', ')}
+                <strong>Cross refs:</strong> {crossRefsText}
               </div>
               {highlighted[verseKey] && <div className="highlight-pill">Highlighted</div>}
               {notes[verseKey] && <div className="note-pill">Note saved</div>}
@@ -167,7 +176,6 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
             <button
               type="button"
               onClick={async () => {
-                // update local state
                 setNotes((prev) => ({ ...prev, [activeNoteVerse]: noteText }));
                 setActiveNoteVerse('');
 
@@ -181,7 +189,6 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                   }
                   setSyncStatus('synced');
                 } catch (err: any) {
-                  // ignore server save errors; local state still preserved
                   console.error('Note save failed', err);
                   setSyncStatus('error');
                   setLastError(err?.message || String(err));
@@ -208,7 +215,11 @@ export default function ReadClient({ initialNotes = {}, initialHighlights = {} }
                     const res = await fetch('/api/notes', { method: 'DELETE', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ verseId: activeNoteVerse }) });
                     if (!res.ok) throw new Error('Note delete failed');
                   }
-                  setNotes((prev) => { const c = { ...prev }; delete c[activeNoteVerse]; return c; });
+                  setNotes((prev) => {
+                    const copy = { ...prev };
+                    delete copy[activeNoteVerse];
+                    return copy;
+                  });
                   setActiveNoteVerse('');
                   setSyncStatus('synced');
                 } catch (err: any) {
