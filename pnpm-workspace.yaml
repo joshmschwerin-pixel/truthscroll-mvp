@@ -349,7 +349,6 @@ allowBuilds:
   ttf2woff2: true
   typemoq: true
   unix-dgram: true
-  unrs-resolver: set this to true or false
   ursa-optional: true
   usb: true
   utf-8-validate: true
@@ -373,7 +372,9 @@ allowBuilds:
   zlib-sync: true
   zopflipng-bin: true
   # dyad-default-allow-builds end
+  unrs-resolver: true
 
 packages:
-  - .
+  - "truthscroll-mvp"
+
 minimumReleaseAge: 1440
