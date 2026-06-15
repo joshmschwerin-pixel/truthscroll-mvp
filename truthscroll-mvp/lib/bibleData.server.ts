@@ -196,3 +196,7 @@ export function getAvailableChapters(book: string): number[] {
     )
   ).sort((a, b) => a - b);
 }
+
+export function getAvailableVerses(book: string, chapter: number): number[] {
+  return getChapter(book, chapter).map((verse) => verse.verse).sort((a, b) => a - b);
+}
