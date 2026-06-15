@@ -2,32 +2,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import getSupabaseClient from '@/lib/supabaseClient';
 import type { BibleVerse } from '@/lib/bibleData';
+import { getAvailableBooks, getAvailableChapters, getChapter } from '@/lib/bibleData';
 
 type ReadClientProps = {
   initialNotes?: Record<string, string>;
   initialHighlights?: Record<string, boolean>;
   initialBook?: string;
   initialChapter?: number;
-  availableBooks: string[];
-  availableChapters: number[];
-  initialVerses: BibleVerse[];
 };
 
 export default function ReadClient({
   initialNotes = {},
   initialHighlights = {},
   initialBook,
-  initialChapter,
-  availableBooks,
-  availableChapters,
-  initialVerses
+  initialChapter
 }: ReadClientProps) {
+  const availableBooks = getAvailableBooks();
   const defaultBook = initialBook && availableBooks.includes(initialBook) ? initialBook : availableBooks[0] || '';
-  const sortedAvailableChapters = [...availableChapters].sort((a, b) => a - b);
-  const defaultChapter =
-    initialChapter && sortedAvailableChapters.includes(initialChapter)
-      ? initialChapter
-      : sortedAvailableChapters[0] || 1;
+  const initialBookChapters = defaultBook ? getAvailableChapters(defaultBook) : [];
+  const defaultChapter = initialChapter && initialBookChapters.includes(initialChapter) ? initialChapter : initialBookChapters[0] || 1;
 
   const [selectedChapter, setSelectedChapter] = useState({ book: defaultBook, chapter: defaultChapter });
   const [notes, setNotes] = useState<Record<string, string>>(initialNotes || {});
@@ -37,13 +30,15 @@ export default function ReadClient({
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastError, setLastError] = useState<string>('');
 
-  const chapterOptions = useMemo(() => [...availableChapters].sort((a, b) => a - b), [availableChapters]);
+  const availableChapters = useMemo(
+    () => (selectedChapter.book ? getAvailableChapters(selectedChapter.book) : []),
+    [selectedChapter.book]
+  );
 
-  const verses = useMemo<BibleVerse[]>(() => {
-    if (selectedChapter.book !== defaultBook) return [];
-    if (selectedChapter.chapter !== defaultChapter) return [];
-    return initialVerses;
-  }, [defaultBook, defaultChapter, initialVerses, selectedChapter.book, selectedChapter.chapter]);
+  const verses = useMemo<BibleVerse[]>(
+    () => (selectedChapter.book ? getChapter(selectedChapter.book, selectedChapter.chapter) : []),
+    [selectedChapter.book, selectedChapter.chapter]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -134,7 +129,8 @@ export default function ReadClient({
           value={selectedChapter.book}
           onChange={(event) => {
             const book = event.target.value;
-            setSelectedChapter({ book, chapter: chapterOptions[0] || 1 });
+            const chapters = getAvailableChapters(book);
+            setSelectedChapter({ book, chapter: chapters[0] || 1 });
           }}
         >
           {availableBooks.map((book) => (
@@ -151,7 +147,7 @@ export default function ReadClient({
             setSelectedChapter((prev) => ({ ...prev, chapter: Number(event.target.value) }));
           }}
         >
-          {chapterOptions.map((chapter) => (
+          {availableChapters.map((chapter) => (
             <option key={chapter} value={chapter}>
               {chapter}
             </option>
@@ -163,8 +159,6 @@ export default function ReadClient({
         <h2>
           {selectedChapter.book} {selectedChapter.chapter}
         </h2>
-
-        {verses.length === 0 && <p>No verses found for this chapter.</p>}
 
         {verses.map((verse) => {
           const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;

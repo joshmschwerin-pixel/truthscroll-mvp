@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { getSupabaseAdmin } from '@/lib/supabaseServer';
-import { getAvailableBooks, getAvailableChapters, getChapter } from '@/lib/bibleData.server';
+import { getAvailableBooks, getAvailableChapters } from '@/lib/bibleData';
 import ReadClient from './ReadClient';
 
 type ReadPageProps = {
@@ -22,7 +22,6 @@ export default async function ReadPage({ searchParams }: ReadPageProps) {
   const defaultChapter = availableChapters.includes(1) ? 1 : availableChapters[0] || 1;
   const requestedChapterNumber = Number(searchParams?.chapter);
   const requestedChapter = availableChapters.includes(requestedChapterNumber) ? requestedChapterNumber : defaultChapter;
-  const initialVerses = requestedBook ? getChapter(requestedBook, requestedChapter) : [];
 
   try {
     const cookieStore: any = cookies();
@@ -56,9 +55,6 @@ export default async function ReadPage({ searchParams }: ReadPageProps) {
       initialHighlights={initialHighlights}
       initialBook={requestedBook}
       initialChapter={requestedChapter}
-      availableBooks={availableBooks}
-      availableChapters={availableChapters}
-      initialVerses={initialVerses}
     />
   );
 }
