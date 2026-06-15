@@ -8,6 +8,77 @@ export type BibleVerse = {
   text: string;
 };
 
+const canonicalBookOrder = [
+  'Genesis',
+  'Exodus',
+  'Leviticus',
+  'Numbers',
+  'Deuteronomy',
+  'Joshua',
+  'Judges',
+  'Ruth',
+  '1 Samuel',
+  '2 Samuel',
+  '1 Kings',
+  '2 Kings',
+  '1 Chronicles',
+  '2 Chronicles',
+  'Ezra',
+  'Nehemiah',
+  'Esther',
+  'Job',
+  'Psalms',
+  'Proverbs',
+  'Ecclesiastes',
+  'Song of Solomon',
+  'Isaiah',
+  'Jeremiah',
+  'Lamentations',
+  'Ezekiel',
+  'Daniel',
+  'Hosea',
+  'Joel',
+  'Amos',
+  'Obadiah',
+  'Jonah',
+  'Micah',
+  'Nahum',
+  'Habakkuk',
+  'Zephaniah',
+  'Haggai',
+  'Zechariah',
+  'Malachi',
+  'Matthew',
+  'Mark',
+  'Luke',
+  'John',
+  'Acts',
+  'Romans',
+  '1 Corinthians',
+  '2 Corinthians',
+  'Galatians',
+  'Ephesians',
+  'Philippians',
+  'Colossians',
+  '1 Thessalonians',
+  '2 Thessalonians',
+  '1 Timothy',
+  '2 Timothy',
+  'Titus',
+  'Philemon',
+  'Hebrews',
+  'James',
+  '1 Peter',
+  '2 Peter',
+  '1 John',
+  '2 John',
+  '3 John',
+  'Jude',
+  'Revelation'
+];
+
+const canonicalBookOrderIndex = new Map(canonicalBookOrder.map((book, index) => [book, index]));
+
 const bookFiles = [
   'kjv_matthew.json',
   'kjv_mark.json',
@@ -73,6 +144,13 @@ export function getAllVerses(): BibleVerse[] {
   cachedVerses = bookFiles
     .flatMap(loadBookFile)
     .sort((a, b) => {
+      const aBookIndex = canonicalBookOrderIndex.get(a.book);
+      const bBookIndex = canonicalBookOrderIndex.get(b.book);
+
+      if (aBookIndex !== undefined && bBookIndex !== undefined && aBookIndex !== bBookIndex) {
+        return aBookIndex - bBookIndex;
+      }
+
       if (a.book !== b.book) return a.book.localeCompare(b.book);
       if (a.chapter !== b.chapter) return a.chapter - b.chapter;
       return a.verse - b.verse;
@@ -94,7 +172,19 @@ export function getChapter(book: string, chapter: number): BibleVerse[] {
 }
 
 export function getAvailableBooks(): string[] {
-  return Array.from(new Set(getAllVerses().map((verse) => verse.book)));
+  return Array.from(new Set(getAllVerses().map((verse) => verse.book))).sort((a, b) => {
+    const aBookIndex = canonicalBookOrderIndex.get(a);
+    const bBookIndex = canonicalBookOrderIndex.get(b);
+
+    if (aBookIndex !== undefined && bBookIndex !== undefined) {
+      return aBookIndex - bBookIndex;
+    }
+
+    if (aBookIndex !== undefined) return -1;
+    if (bBookIndex !== undefined) return 1;
+
+    return a.localeCompare(b);
+  });
 }
 
 export function getAvailableChapters(book: string): number[] {
