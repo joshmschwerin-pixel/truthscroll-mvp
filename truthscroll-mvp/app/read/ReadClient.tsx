@@ -1,26 +1,29 @@
 "use client";
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import getSupabaseClient from '@/lib/supabaseClient';
 import type { BibleVerse } from '@/lib/bibleData';
-import { getAvailableBooks, getAvailableChapters, getChapter } from '@/lib/bibleData';
 
 type ReadClientProps = {
   initialNotes?: Record<string, string>;
   initialHighlights?: Record<string, boolean>;
   initialBook?: string;
   initialChapter?: number;
+  availableBooks: string[];
+  availableChapters: number[];
+  initialVerses: BibleVerse[];
 };
 
 export default function ReadClient({
   initialNotes = {},
   initialHighlights = {},
   initialBook,
-  initialChapter
+  initialChapter,
+  availableBooks,
+  availableChapters,
+  initialVerses
 }: ReadClientProps) {
-  const availableBooks = getAvailableBooks();
   const defaultBook = initialBook && availableBooks.includes(initialBook) ? initialBook : availableBooks[0] || '';
-  const initialBookChapters = defaultBook ? getAvailableChapters(defaultBook) : [];
-  const defaultChapter = initialChapter && initialBookChapters.includes(initialChapter) ? initialChapter : initialBookChapters[0] || 1;
+  const defaultChapter = initialChapter && availableChapters.includes(initialChapter) ? initialChapter : availableChapters[0] || 1;
 
   const [selectedChapter, setSelectedChapter] = useState({ book: defaultBook, chapter: defaultChapter });
   const [notes, setNotes] = useState<Record<string, string>>(initialNotes || {});
@@ -29,16 +32,6 @@ export default function ReadClient({
   const [noteText, setNoteText] = useState('');
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastError, setLastError] = useState<string>('');
-
-  const availableChapters = useMemo(
-    () => (selectedChapter.book ? getAvailableChapters(selectedChapter.book) : []),
-    [selectedChapter.book]
-  );
-
-  const verses = useMemo<BibleVerse[]>(
-    () => (selectedChapter.book ? getChapter(selectedChapter.book, selectedChapter.chapter) : []),
-    [selectedChapter.book, selectedChapter.chapter]
-  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -129,8 +122,7 @@ export default function ReadClient({
           value={selectedChapter.book}
           onChange={(event) => {
             const book = event.target.value;
-            const chapters = getAvailableChapters(book);
-            setSelectedChapter({ book, chapter: chapters[0] || 1 });
+            window.location.href = `/read?book=${encodeURIComponent(book)}&chapter=1`;
           }}
         >
           {availableBooks.map((book) => (
@@ -144,7 +136,9 @@ export default function ReadClient({
         <select
           value={String(selectedChapter.chapter)}
           onChange={(event) => {
-            setSelectedChapter((prev) => ({ ...prev, chapter: Number(event.target.value) }));
+            const chapter = Number(event.target.value);
+            setSelectedChapter((prev) => ({ ...prev, chapter }));
+            window.location.href = `/read?book=${encodeURIComponent(selectedChapter.book)}&chapter=${chapter}`;
           }}
         >
           {availableChapters.map((chapter) => (
@@ -160,78 +154,82 @@ export default function ReadClient({
           {selectedChapter.book} {selectedChapter.chapter}
         </h2>
 
-        {verses.map((verse) => {
-          const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;
+        {initialVerses.length === 0 ? (
+          <p>No verses found for this chapter.</p>
+        ) : (
+          initialVerses.map((verse) => {
+            const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;
 
-          return (
-            <article
-              key={verseKey}
-              id={`verse-${verse.verse}`}
-              className={`verse-card ${highlighted[verseKey] ? 'highlighted' : ''}`}
-            >
-              <div className="verse-header">
-                <span className="verse-label">{verse.verse}</span>
-                <span className="verse-themes"></span>
-              </div>
+            return (
+              <article
+                key={verseKey}
+                id={`verse-${verse.verse}`}
+                className={`verse-card ${highlighted[verseKey] ? 'highlighted' : ''}`}
+              >
+                <div className="verse-header">
+                  <span className="verse-label">{verse.verse}</span>
+                  <span className="verse-themes"></span>
+                </div>
 
-              <p>{verse.text}</p>
+                <p>{verse.text}</p>
 
-              <div className="verse-actions">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const newValue = !highlighted[verseKey];
-                    setHighlighted((prev) => ({ ...prev, [verseKey]: newValue }));
+                <div className="verse-actions">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const newValue = !highlighted[verseKey];
+                      setHighlighted((prev) => ({ ...prev, [verseKey]: newValue }));
 
-                    try {
-                      const supabase = getSupabaseClient();
-                      const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
-                      const token = sessionData?.session?.access_token;
+                      try {
+                        const supabase = getSupabaseClient();
+                        const { data: sessionData } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
+                        const token = sessionData?.session?.access_token;
 
-                      if (token && newValue) {
-                        const res = await fetch('/api/highlights', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                          body: JSON.stringify({ verseId: verseKey, color: 'yellow' })
-                        });
-                        if (!res.ok) throw new Error('Highlight save failed');
+                        if (token && newValue) {
+                          const res = await fetch('/api/highlights', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ verseId: verseKey, color: 'yellow' })
+                          });
+                          if (!res.ok) throw new Error('Highlight save failed');
+                        }
+
+                        if (token && !newValue) {
+                          const res = await fetch('/api/highlights', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ verseId: verseKey })
+                          });
+                          if (!res.ok) throw new Error('Highlight delete failed');
+                        }
+
+                        setSyncStatus('synced');
+                      } catch (err: any) {
+                        console.error('Highlight save failed', err);
+                        setSyncStatus('error');
+                        setLastError(err?.message || String(err));
                       }
+                    }}
+                  >
+                    {highlighted[verseKey] ? 'Unhighlight' : 'Highlight'}
+                  </button>
 
-                      if (token && !newValue) {
-                        const res = await fetch('/api/highlights', {
-                          method: 'DELETE',
-                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                          body: JSON.stringify({ verseId: verseKey })
-                        });
-                        if (!res.ok) throw new Error('Highlight delete failed');
-                      }
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveNoteVerse(verseKey);
+                    }}
+                  >
+                    Note
+                  </button>
+                </div>
 
-                      setSyncStatus('synced');
-                    } catch (err: any) {
-                      console.error('Highlight save failed', err);
-                      setSyncStatus('error');
-                      setLastError(err?.message || String(err));
-                    }
-                  }}
-                >
-                  {highlighted[verseKey] ? 'Unhighlight' : 'Highlight'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveNoteVerse(verseKey);
-                  }}
-                >
-                  Note
-                </button>
-              </div>
-
-              {highlighted[verseKey] && <div className="highlight-pill">Highlighted</div>}
-              {notes[verseKey] && <div className="note-pill">Note saved</div>}
-            </article>
-          );
-        })}
+                {highlighted[verseKey] && <div className="highlight-pill">Highlighted</div>}
+                {notes[verseKey] && <div className="note-pill">Note saved</div>}
+              </article>
+            );
+          })
+        )}
       </section>
 
       {activeNoteVerse && (
