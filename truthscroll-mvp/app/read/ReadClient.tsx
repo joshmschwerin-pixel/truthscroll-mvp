@@ -23,7 +23,11 @@ export default function ReadClient({
   initialVerses
 }: ReadClientProps) {
   const defaultBook = initialBook && availableBooks.includes(initialBook) ? initialBook : availableBooks[0] || '';
-  const defaultChapter = initialChapter && availableChapters.includes(initialChapter) ? initialChapter : availableChapters[0] || 1;
+  const sortedAvailableChapters = [...availableChapters].sort((a, b) => a - b);
+  const defaultChapter =
+    initialChapter && sortedAvailableChapters.includes(initialChapter)
+      ? initialChapter
+      : sortedAvailableChapters[0] || 1;
 
   const [selectedChapter, setSelectedChapter] = useState({ book: defaultBook, chapter: defaultChapter });
   const [notes, setNotes] = useState<Record<string, string>>(initialNotes || {});
@@ -33,13 +37,13 @@ export default function ReadClient({
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle');
   const [lastError, setLastError] = useState<string>('');
 
-  const verses = useMemo<BibleVerse[]>(
-    () =>
-      selectedChapter.book === defaultBook && selectedChapter.chapter === defaultChapter
-        ? initialVerses
-        : [],
-    [defaultBook, defaultChapter, initialVerses, selectedChapter.book, selectedChapter.chapter]
-  );
+  const chapterOptions = useMemo(() => [...availableChapters].sort((a, b) => a - b), [availableChapters]);
+
+  const verses = useMemo<BibleVerse[]>(() => {
+    if (selectedChapter.book !== defaultBook) return [];
+    if (selectedChapter.chapter !== defaultChapter) return [];
+    return initialVerses;
+  }, [defaultBook, defaultChapter, initialVerses, selectedChapter.book, selectedChapter.chapter]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -130,7 +134,7 @@ export default function ReadClient({
           value={selectedChapter.book}
           onChange={(event) => {
             const book = event.target.value;
-            setSelectedChapter({ book, chapter: 1 });
+            setSelectedChapter({ book, chapter: chapterOptions[0] || 1 });
           }}
         >
           {availableBooks.map((book) => (
@@ -147,7 +151,7 @@ export default function ReadClient({
             setSelectedChapter((prev) => ({ ...prev, chapter: Number(event.target.value) }));
           }}
         >
-          {availableChapters.map((chapter) => (
+          {chapterOptions.map((chapter) => (
             <option key={chapter} value={chapter}>
               {chapter}
             </option>
@@ -159,6 +163,8 @@ export default function ReadClient({
         <h2>
           {selectedChapter.book} {selectedChapter.chapter}
         </h2>
+
+        {verses.length === 0 && <p>No verses found for this chapter.</p>}
 
         {verses.map((verse) => {
           const verseKey = `${verse.book}-${verse.chapter}-${verse.verse}`;
